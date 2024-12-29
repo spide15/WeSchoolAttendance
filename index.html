@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laundey Lapaate</title>
+    <link rel="icon" href="Icon.png" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f3f3f3;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .entry {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .entry div {
+            flex: 1;
+            margin: 5px 0;
+            word-break: break-word;
+        }
+        .entry button {
+            margin-left: 10px;
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .entry button:hover {
+            background-color: #0056b3;
+        }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .entry {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .entry button {
+                margin-top: 5px;
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+        @media (max-width: 480px) {
+            body {
+                margin: 10px;
+            }
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>No fear ,when Deep is Here</h1>
+        <div id="entries">
+            <!-- Dynamic entries will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // Replace these placeholders with your actual Google Sheet details
+        const SHEET_ID = "1uSGSysEjMPgoubOmqTpTaMH7C6YJIMiJtmgpIjw5RF8"; // Replace with your Google Sheet ID
+        const API_KEY = "AIzaSyDNV1QqT_wOcDVXq3Sxmq2WceJvBVjFZFM"; // Replace with your API Key
+        const SHEET_NAME = "Sheet1"; // Replace with the name of your sheet tab
+
+        // Fetch entries from Google Sheets
+        async function fetchEntries() {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.values) {
+                    const entries = data.values.slice(1).map(row => ({
+                        id: row[0],
+                        password: row[1],
+                    }));
+                    renderEntries(entries);
+                } else {
+                    alert("No data found in the sheet.");
+                }
+            } catch (error) {
+                console.error("Error fetching data: ", error);
+                alert("Failed to fetch data from Google Sheets.");
+            }
+        }
+
+        // Render the fetched entries dynamically
+        function renderEntries(entries) {
+            const entriesContainer = document.getElementById("entries");
+            entriesContainer.innerHTML = ""; // Clear existing entries
+            entries.forEach(entry => {
+                const entryDiv = document.createElement("div");
+                entryDiv.classList.add("entry");
+                entryDiv.innerHTML = `
+                    <div><strong>ID:</strong> ${entry.id}</div>
+                    <div><strong>Password:</strong> ${entry.password}</div>
+                    <button onclick="copyToClipboard('${entry.id}')">Copy ID</button>
+                    <button onclick="copyToClipboard('${entry.password}')">Copy Password</button>
+                `;
+                entriesContainer.appendChild(entryDiv);
+            });
+        }
+
+        // Copy text to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`Copied: ${text}`);
+            }).catch(err => {
+                console.error("Failed to copy text: ", err);
+            });
+        }
+
+        // Fetch and display entries on page load
+        fetchEntries();
+    </script>
+</body>
+</html>
